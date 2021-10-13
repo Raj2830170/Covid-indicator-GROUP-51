@@ -1,0 +1,19 @@
+import cv2
+import numpy as np
+import pandas as pd
+import shutil
+def upload():
+	name = ("testimgs")
+	i=[]
+	print(name)
+	im = cv2.imread(name)
+	downsize = cv2.resize(im, (128,128), interpolation = cv2.INTER_NEAREST)
+	n= np.asarray(downsize)
+	i.append(n)
+	x=np.array(i)
+	print("Your Covid-19 Test Result :  ")
+	pred = cls.predict_classes(x)
+	if(pred == [[0]]):
+		print("Negative"+"\n\n")
+	else:
+		print("Positive"+"\n\n")
