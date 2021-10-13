@@ -1,0 +1,44 @@
+import cv2
+import os
+from sklearn.model_selection import train_test_split
+import numpy as np
+import pandas as pd
+import shutil
+def data_extract():
+	train_positive_path=os.path.join('train/positive')
+	train_negative_path=os.path.join('train/negative')
+	test_positive_path=os.path.join('test/positive')
+	test_negative_path=os.path.join('test/negative')
+	train_pos_imgs=[]
+	for filename in os.listdir(train_positive_path):
+		img = cv2.imread(os.path.join(train_positive_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)
+		train_pos_imgs.append(downsize)
+	test_pos_imgs=[]
+	for filename in os.listdir(test_positive_path):
+		img = cv2.imread(os.path.join(test_positive_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)    
+		test_pos_imgs.append(downsize)
+	train_neg_imgs=[]
+	for filename in os.listdir(train_negative_path):
+		img = cv2.imread(os.path.join(train_negative_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)
+		train_neg_imgs.append(downsize)
+	test_neg_imgs=[]
+	for filename in os.listdir(test_negative_path):
+		img = cv2.imread(os.path.join(test_negative_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)
+		test_neg_imgs.append(downsize)
+	train_p_y=[1]*212
+	train_n_y=[0]*800
+	test_p_y=[1]*52
+	test_n_y=[0]*200
+	train_x=train_pos_imgs+train_neg_imgs
+	train_x=np.array(train_x)
+	train_y=train_p_y+train_n_y
+	train_y=np.array(train_y)
+	test_x=test_pos_imgs+test_neg_imgs
+	test_x=np.array(test_x)
+	test_y=test_p_y+test_n_y
+	test_y=np.array(test_y)
+        return train_x,train_y,test_x,test_y
