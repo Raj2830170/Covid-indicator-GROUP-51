@@ -1,0 +1,26 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import os
+positive_cases_path=os.path.join('../input/covidct/CT_COVID')
+negative_cases_path=os.path.join('../input/covidct/CT_NonCOVID')
+positive_CT_images=glob(os.path.join(positive_cases_path,"*.png"))
+negative_CT_images=glob(os.path.join(negative_cases_path,"*.png"))
+covid={'class':'Covid_CT','path': positive_cases_path,'images':positive_CT_images}
+non_covid={'class':'NonCovid_CT','path':negative_cases_path,'images':negative_CT_images}
+subdirs=['train/','test/']
+for subdir in subdirs:
+    labeldirs=['Covid_CT','NonCovid_CT']
+    for labeldir in labeldirs:
+        newdir=subdir+labeldir 
+        os.makedirs(newdir,exist_ok='True')
+random.seed(123)
+test_ratio=0.2
+for cases in [covid,non_covid]:
+    total_cases=len(cases['images'])
+    num_to_select=(int)(total_cases*test_ratio)
+    print(num_to_select,total_cases)
+    random_files_list=random.sample(cases['images'],num_to_select)
+    for files in random_files_list:
+        shutil.copy(files,'test/'+cases['class'])
+
