@@ -1,0 +1,136 @@
+from tkinter import messagebox
+from tkinter import *
+from tkinter import simpledialog
+import tkinter
+from tkinter import filedialog
+import matplotlib.pyplot as plt
+import numpy as np
+import random
+import numpy as np
+import pandas as pd
+import random
+import os
+import tensorflow as tf
+import cv2
+import matplotlib.pyplot as plt
+import shutil
+from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askdirectory
+import cv2
+from sklearn.model_selection import train_test_split
+import math
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras import Sequential
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
+main = tkinter.Tk()
+main.title("COVID CLASSIFICATION")
+main.geometry("1300x1200")
+
+global cls
+
+def start():
+	global cls
+	text.insert(END,"------The process has begun------"+"\n\n")
+	train_positive_path=os.path.join('train/positive')
+	train_negative_path=os.path.join('train/negative')
+	test_positive_path=os.path.join('test/positive')
+	test_negative_path=os.path.join('test/negative')
+	
+	train_pos_imgs=[]
+	for filename in os.listdir(train_positive_path):
+		img = cv2.imread(os.path.join(train_positive_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)
+    		train_pos_imgs.append(downsize)
+	test_pos_imgs=[]
+	for filename in os.listdir(test_positive_path):
+		img = cv2.imread(os.path.join(test_positive_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)    
+		test_pos_imgs.append(downsize)
+	train_neg_imgs=[]
+	for filename in os.listdir(train_negative_path):
+		img = cv2.imread(os.path.join(train_negative_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)
+		train_neg_imgs.append(downsize)	
+	test_neg_imgs=[]
+	for filename in os.listdir(test_negative_path):
+		img = cv2.imread(os.path.join(test_negative_path,filename))
+		downsize = cv2.resize(img, (128,128), interpolation = cv2.INTER_NEAREST)
+		test_neg_imgs.append(downsize)	
+	train_p_y=[1]*212
+	train_n_y=[0]*800
+	test_p_y=[1]*52
+	test_n_y=[0]*200
+	train_x=train_pos_imgs+train_neg_imgs
+	train_x=np.array(train_x)
+	train_y=train_p_y+train_n_y
+	train_y=np.array(train_y)
+	test_x=test_pos_imgs+test_neg_imgs
+	test_x=np.array(test_x)
+	test_y=test_p_y+test_n_y
+	test_y=np.array(test_y)
+	text.insert(END,"------Data has been loaded------"+"\n\n")
+	cnn = Sequential([
+		Conv2D(16 , 3 , padding ='same', activation ='leakyrelu', input_shape=(128,128,3)),
+		MaxPooling2D(2,2),
+		Conv2D(64 ,3 , padding='same', activation ='relu'),
+		MaxPooling2D(2,2),
+                Conv2D(128 ,3 , padding = 'same', activation = 'leakyrelu'),
+                Conv2D(128 ,3 , padding = 'same', activation = 'relu'),
+		Conv2D(64, 3, padding='same', activation ='relu'),
+		MaxPooling2D(2,2),
+		Flatten(),
+		Dense(1024, activation='sigmoid'),
+		Dense(1)
+	])
+	cnn.compile(optimizer='adam', loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),metrics=['accuracy'])
+	text.insert(END,"------Model Has Been Trained with the following Accuracies------"+"\n\n")
+	history = cnn.fit(train_x,train_y,batch_size=128,epochs=10,verbose=1,validation_data=(test_x,test_y))
+	cls=cnn
+	acc = history.history['accuracy']
+	val_acc = history.history['val_accuracy']
+	text.insert(END,"Train Accuracy : "+str(acc[-1]*100)+"\n")
+	text.insert(END,"Validation Accuracy : "+str(val_acc[-1]*100)+"\n\n")
+def upload():
+	name = filedialog.askopenfilename(initialdir="testimgs")
+	i=[]
+	print(name)
+	im = cv2.imread(name)
+	downsize = cv2.resize(im, (128,128), interpolation = cv2.INTER_NEAREST)
+	n= np.asarray(downsize)
+	i.append(n)
+	x=np.array(i)
+	text.insert(END,"Your Covid-19 Test Result :  ")
+	pred = cls.predict_classes(x)
+	if(pred == [[0]]):
+		text.insert(END,"Negative"+"\n\n")
+	else:
+		text.insert(END,"Positive"+"\n\n")
+def close():
+    main.destroy()	
+
+font = ('times', 16, 'bold')
+title = Label(main, text='COVID CLASSIFICATION')
+title.config(bg='deep sky blue', fg='white')  
+title.config(font=font)           
+title.config(height=3, width=120)       
+title.place(x=0,y=5)
+font1 = ('times', 12, 'bold')
+text=Text(main,height=20,width=150)
+scroll=Scrollbar(text)
+text.configure(yscrollcommand=scroll.set)
+text.place(x=50,y=120)
+text.config(font=font1)
+font1 = ('times', 13, 'bold')
+uploadButton = Button(main, text="Start Processing Data", command=start)
+uploadButton.place(x=50,y=550)
+uploadButton.config(font=font1)  
+processButton = Button(main, text="Upload and Test", command=upload)
+processButton.place(x=250,y=550)
+processButton.config(font=font1) 
+featuresButton = Button(main, text="Exit", command=exit)
+featuresButton.place(x=650,y=550)
+featuresButton.config(font=font1)
+main.config(bg='LightSteelBlue3')
+main.mainloop()
